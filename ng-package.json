@@ -1,13 +1,14 @@
 {
-    "$schema":  "./node_modules/ng-packagr/ng-package.schema.json",
-    "dest":  "./dist/@synapsium/ngx-scrollbar",
-    "lib":  {
-                "entryFile":  "src/public_api.ts"
-            },
-    "whitelistedNonPeerDependencies":  [
-                                           "angular",
-                                           "core-js",
-                                           "rxjs",
-                                           "zone.js"
-                                       ]
+    "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
+    "dest": "./dist/@synapsium/ngx-scrollbar",
+    "lib": {
+        "entryFile": "src/public_api.ts",
+        "styleIncludePaths": ["src/styles"]
+    },
+    "whitelistedNonPeerDependencies": [
+        "angular",
+        "core-js",
+        "rxjs",
+        "zone.js"
+    ]
 }
