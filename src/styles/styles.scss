@@ -1,50 +1,62 @@
-.scrollbar-container {
-    overflow: hidden;
+[scrollbar] {
+    position: relative;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: flex-start;
     width: inherit;
     height: inherit;
     max-width: inherit;
     max-height: inherit;
 
-    .scrollbar-mask {
-        direction: inherit;
-        position: absolute;
+    .scrollbar-container {
         overflow: hidden;
-        padding: 0;
-        margin: 0;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: auto !important;
-        height: auto !important;
-        z-index: 0;
-
-        .scrollbar-offset {
-            direction: inherit !important;
-            box-sizing: inherit !important;
-            resize: none !important;
+        width: inherit;
+        height: inherit;
+        max-width: inherit;
+        max-height: inherit;
+    
+        .scrollbar-mask {
+            direction: inherit;
             position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
+            overflow: hidden;
             padding: 0;
             margin: 0;
-            -webkit-overflow-scrolling: touch;
-
-            .scrollbar-content {
-                direction: inherit;
-                box-sizing: border-box !important;
-                position: relative;
-                display: block;
-                height: 100%;
-                width: auto;
-                visibility: visible;
-                overflow: scroll;
-                max-width: 100%;
-                max-height: 100%;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: auto !important;
+            height: auto !important;
+            z-index: 0;
+    
+            .scrollbar-offset {
+                direction: inherit !important;
+                box-sizing: inherit !important;
+                resize: none !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+                -webkit-overflow-scrolling: touch;
+    
+                .scrollbar-content {
+                    direction: inherit;
+                    box-sizing: border-box !important;
+                    position: relative;
+                    display: block;
+                    height: 100%;
+                    width: auto;
+                    visibility: visible;
+                    overflow: scroll;
+                    max-width: 100%;
+                    max-height: 100%;
+                }
             }
         }
     }
 }
-
