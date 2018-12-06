@@ -1,4 +1,4 @@
-import { Directive, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, OnInit, Renderer2, Input } from '@angular/core';
 import { CLASSNAME } from './constants/classname';
 
 @Directive({
@@ -6,6 +6,8 @@ import { CLASSNAME } from './constants/classname';
 })
 export class ScrollbarDirective implements OnInit{
   
+  @Input() autoHide:boolean;
+
   private _containerElement: ElementRef;
   private _maskElement: ElementRef;
   private _offsetElement: ElementRef;
@@ -91,4 +93,11 @@ export class ScrollbarDirective implements OnInit{
     return result;
   }
 
+  /**
+   * Get native scrollbar width.
+   * @returns {number} Returns width of native scrollbar.
+   */
+  private _getScrollbarWidth() : number{
+    return this._contentElement.nativeElement.offsetWidth - this._contentElement.nativeElement.clientWidth;
+  }
 }
