@@ -1,11 +1,10 @@
-import { Directive, ElementRef, OnInit, Renderer2, Input } from '@angular/core';
+import { Directive, ElementRef, OnInit, OnDestroy, OnChanges, Renderer2, SimpleChanges, Input } from '@angular/core';
 import { CLASSNAME } from './constants/classname';
 
 @Directive({
   selector: '[scrollbar]'
 })
-export class ScrollbarDirective implements OnInit{
-  
+export class ScrollbarDirective implements OnInit, OnDestroy, OnChanges{
   @Input() autoHide:boolean;
 
   private _containerElement: ElementRef;
@@ -16,6 +15,7 @@ export class ScrollbarDirective implements OnInit{
   private _horizontalBarElement: ElementRef;
   private _verticalTrackbarElement: ElementRef;
   private _verticalBarElement: ElementRef;
+  private _
 
   /**
    * Represents scrollbar constructor.
@@ -26,10 +26,22 @@ export class ScrollbarDirective implements OnInit{
   constructor(private _element: ElementRef, private _renderer: Renderer2) { }
 
   /**
-   * OnInit lifecycle
+   * OnInit lifecycle.
    */
   public ngOnInit(): void {
     this._initDOM();
+  }
+
+  /**
+   * OnChanges lifecycle.
+   */
+  ngOnChanges(changes: SimpleChanges): void {
+  }
+
+  /**
+   * OnDestroy lifecycle.
+   */
+  ngOnDestroy(): void {
   }
 
   /**
@@ -79,6 +91,11 @@ export class ScrollbarDirective implements OnInit{
     
     this._renderer.appendChild(this._verticalTrackbarElement, this._verticalBarElement);
     this._renderer.appendChild(this._element.nativeElement, this._verticalTrackbarElement);
+  }
+
+
+  private _initListeners(){
+
   }
 
   /**
