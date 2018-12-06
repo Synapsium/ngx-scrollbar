@@ -7,4 +7,4 @@ export const CLASSNAME = {
     HORIZONTAL_TRACKBAR: 'scrollbar-horizontal',
     VERTICAL_TRACKBAR: 'scrollbar-vertical',
     BAR: 'scrollbar-bar'
-}
+};
