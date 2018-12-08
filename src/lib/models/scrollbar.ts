@@ -1,4 +1,4 @@
-export class NativeScrollbar {
+export class Scrollbar {
     public verticalThickness: number;
     public horizontalThickness: number;
 }
