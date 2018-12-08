@@ -1,6 +1,7 @@
 import { Directive, ElementRef, OnInit, AfterViewInit, OnDestroy, OnChanges, Renderer2, SimpleChanges, Input } from '@angular/core';
 import { CLASSNAME } from './constants/classname';
-import { EventListenerAction } from './models/event-listener-action';
+import { EventListenerAction} from './models/event-listener-action';
+import { NativeScrollbar } from './models/native-scrollbar';
 
 @Directive({
   selector: '[scrollbar]'
@@ -35,7 +36,9 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     this._initDOM();
     this._initListeners();
 
-    this._updateTrackbarThickness();
+    const nativeScrollbar = this._getNativeScrollbar();
+    this._updateTrackbarThickness(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
+    this._hideNativeScrollbar(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
 
     // Set margin to hide native scrollbar
 
@@ -161,28 +164,51 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     this._bindEventListenerToAction();
   }
 
+  /**
+   * Resize event on window.
+   * @param {Event} e - Event resize
+   * @returns {void}
+   */
   private _onWindowResize(e: Event): void{
-    this._updateTrackbarThickness();
+    const nativeScrollbar = this._getNativeScrollbar();
+    this._updateTrackbarThickness(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
+    this._hideNativeScrollbar(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
   }
 
   /**
    * Update trackbar thickness.
    * Trackbar thickness reduces when zoom in
    * and increases with zoom out
+   * @param {number} verticalThickness - Vertical native scrollbar thickness
+   * @param {number} horizontalThickness - Horizontal native scrollbar thickness
    * @returns {void}
    */
-  private _updateTrackbarThickness(): void{
-    const nativeScrollbarThickness = this._getNativeScrollbarThickness();
-    this._renderer.setStyle(this._verticalTrackbarElement, 'width', `${nativeScrollbarThickness}px`);
-    this._renderer.setStyle(this._horizontalTrackbarElement, 'height', `${nativeScrollbarThickness}px`);
+  private _updateTrackbarThickness(verticalThickness: number, horizontalThickness: number): void{
+    this._renderer.setStyle(this._verticalTrackbarElement, 'width', `${verticalThickness}px`);
+    this._renderer.setStyle(this._horizontalTrackbarElement, 'height', `${horizontalThickness}px`);
+    
   }
 
   /**
-   * Get native scrollbar thickness.
-   * @returns {number} Returns thickness of native scrollbar.
+   * Hide native scrollbar using offset.
+   * @param {number} offsetRight - Right offset
+   * @param {number} offsetBottom - Bottom offset
+   * @returns {void}
    */
-  private _getNativeScrollbarThickness() : number{
-    return this._contentElement['offsetWidth'] - this._contentElement['clientWidth'];
+  private _hideNativeScrollbar(offsetRight: number, offsetBottom: number): void{
+    this._renderer.setStyle(this._offsetElement, 'right', `-${offsetRight}px`);
+    this._renderer.setStyle(this._offsetElement, 'bottom', `-${offsetBottom}px`);
+  }
+
+  /**
+   * Get native scrollbar.
+   * @returns { NativeScrollbar } Returns native scrollbar.
+   */
+  private _getNativeScrollbar() : NativeScrollbar {
+    const result = new NativeScrollbar();
+    result.verticalThickness = this._contentElement['offsetWidth'] - this._contentElement['clientWidth'];
+    result.horizontalThickness = this._contentElement['offsetHeight'] - this._contentElement['clientHeight'];
+    return result;
   }
 
   /**
@@ -220,7 +246,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
       }
     } else {
       for(const eventListenerAction of this._eventListenerActionList) {
-        // Check condition if exists
         if(eventListenerAction.condition) {
           if((typeof eventListenerAction.condition === 'function' && !eventListenerAction.condition())) {
             continue;

@@ -71,6 +71,7 @@
         right: 0;
         bottom: 0;
         pointer-events: none;
+        background: #f128285e;
 
         &.scrollbar-vertical {
             top: 0;
@@ -85,7 +86,6 @@
         &.scrollbar-horizontal {
             left: 0;
             height: 11px;
-
 
             .scrollbar-bar {
                 right: auto;
