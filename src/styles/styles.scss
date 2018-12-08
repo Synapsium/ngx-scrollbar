@@ -71,7 +71,6 @@
         right: 0;
         bottom: 0;
         pointer-events: none;
-        background: #f128285e;
 
         &.scrollbar-vertical {
             top: 0;
@@ -91,7 +90,7 @@
                 right: auto;
                 left: 0;
                 top: 2px;
-                height: 7px;
+                height: 80%;
                 min-height: 0;
                 min-width: 10px;
                 width: auto;
@@ -113,7 +112,7 @@
         .scrollbar-bar {
             position: absolute;
             right: 2px;
-            width: 7px;
+            width: 80%;
             min-height: 10px;
 
             &:before {

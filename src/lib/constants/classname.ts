@@ -6,5 +6,6 @@ export const CLASSNAME = {
     TRACKBAR: 'scrollbar-trackbar',
     HORIZONTAL_TRACKBAR: 'scrollbar-horizontal',
     VERTICAL_TRACKBAR: 'scrollbar-vertical',
-    BAR: 'scrollbar-bar'
+    BAR: 'scrollbar-bar',
+    BAR_VISIBLE: 'scrollbar-visible'
 };
