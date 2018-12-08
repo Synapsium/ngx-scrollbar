@@ -1,10 +1,11 @@
-import { Directive, ElementRef, OnInit, OnDestroy, OnChanges, Renderer2, SimpleChanges, Input } from '@angular/core';
+import { Directive, ElementRef, OnInit, AfterViewInit, OnDestroy, OnChanges, Renderer2, SimpleChanges, Input } from '@angular/core';
 import { CLASSNAME } from './constants/classname';
+import { EventListenerAction } from './models/event-listener-action';
 
 @Directive({
   selector: '[scrollbar]'
 })
-export class ScrollbarDirective implements OnInit, OnDestroy, OnChanges{
+export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnChanges{
   @Input() autoHide:boolean;
 
   private _containerElement: ElementRef;
@@ -15,7 +16,8 @@ export class ScrollbarDirective implements OnInit, OnDestroy, OnChanges{
   private _horizontalBarElement: ElementRef;
   private _verticalTrackbarElement: ElementRef;
   private _verticalBarElement: ElementRef;
-  private _
+  private _eventListenerActionList: Array<EventListenerAction> = [];
+  private _unlistenEventListenerList: { [eventName: string]: () => void } = {};
 
   /**
    * Represents scrollbar constructor.
@@ -27,21 +29,44 @@ export class ScrollbarDirective implements OnInit, OnDestroy, OnChanges{
 
   /**
    * OnInit lifecycle.
+   * @returns {void}
    */
   public ngOnInit(): void {
     this._initDOM();
+    this._initListeners();
+
+    this._updateTrackbarThickness();
+
+    // Set margin to hide native scrollbar
+
+    // update size bar
+
+    // update position bar
+  }
+
+  /**
+   * AfterViewInit lifecycle.
+   * @returns {void}
+   */
+  ngAfterViewInit(): void {
   }
 
   /**
    * OnChanges lifecycle.
+   * @returns {void}
+   * @param {SimpleChanges} changes - Changes
    */
   ngOnChanges(changes: SimpleChanges): void {
+    //if !autohide => unbind event mouseenter + display scrollbar
+    //if autohide => bind event mouseenter
   }
 
   /**
    * OnDestroy lifecycle.
+   * @returns {void}
    */
   ngOnDestroy(): void {
+    this._unbindEventListenerToAction();
   }
 
   /**
@@ -64,8 +89,9 @@ export class ScrollbarDirective implements OnInit, OnDestroy, OnChanges{
    *    <div class="scrollbar-bar"></div>    
    *  </div>
    * </div>
+   * @returns {void}
    */
-  private _initDOM(){
+  private _initDOM(): void{
     this._containerElement = this._createElement('div', [CLASSNAME.CONTAINER]);
     this._maskElement = this._createElement('div', [CLASSNAME.MASK]);
     this._offsetElement = this._createElement('div', [CLASSNAME.OFFSET]);
@@ -93,16 +119,79 @@ export class ScrollbarDirective implements OnInit, OnDestroy, OnChanges{
     this._renderer.appendChild(this._element.nativeElement, this._verticalTrackbarElement);
   }
 
+  /**
+   * Init listener to action.
+   * @returns {void}
+   */
+  private _initListeners(): void{
+    this._eventListenerActionList = [
+      { element: this._element.nativeElement, 
+        events: ['mouseenter'], 
+        action: this._log,
+        condition: () => { return this.autoHide; } 
+      }, 
+      { element: this._element.nativeElement, 
+        events: ['mousemove'], 
+        action: this._log
+      },
+      { element: this._element.nativeElement, 
+        events: ['mouseleave'], 
+        action: this._log
+      },
+      { element: this._contentElement, 
+        events: ['scroll'], 
+        action: this._log
+      },
+      { element: window, 
+        events: ['resize'], 
+        action: (e) => { this._onWindowResize(e) }
+      },
+      { element: this._element.nativeElement, 
+        events: ['mousedown',
+                'click',
+                'dblclick',
+                'touchstart',
+                'touchend',
+                'touchmove'], 
+        action: this._log
+      },
+      
+    ];
+    
+    this._bindEventListenerToAction();
+  }
 
-  private _initListeners(){
+  private _onWindowResize(e: Event): void{
+    this._updateTrackbarThickness();
+  }
 
+  /**
+   * Update trackbar thickness.
+   * Trackbar thickness reduces when zoom in
+   * and increases with zoom out
+   * @returns {void}
+   */
+  private _updateTrackbarThickness(): void{
+    const nativeScrollbarThickness = this._getNativeScrollbarThickness();
+    this._renderer.setStyle(this._verticalTrackbarElement, 'width', `${nativeScrollbarThickness}px`);
+    this._renderer.setStyle(this._horizontalTrackbarElement, 'height', `${nativeScrollbarThickness}px`);
+  }
+
+  /**
+   * Get native scrollbar thickness.
+   * @returns {number} Returns thickness of native scrollbar.
+   */
+  private _getNativeScrollbarThickness() : number{
+    return this._contentElement['offsetWidth'] - this._contentElement['clientWidth'];
   }
 
   /**
    * Create element and set class names.
+   * @param {string} element - Current element
+   * @param {Array<string>} classnames - list of class name
    * @returns {ElementRef} Returns element created.
    */
-  private _createElement(element:string, classnames: Array<string>): ElementRef {
+  private _createElement(element: string, classnames: Array<string>): ElementRef {
     const result = this._renderer.createElement(element);
     for(const classname of classnames) {
       this._renderer.addClass(result, classname);
@@ -111,10 +200,72 @@ export class ScrollbarDirective implements OnInit, OnDestroy, OnChanges{
   }
 
   /**
-   * Get native scrollbar width.
-   * @returns {number} Returns width of native scrollbar.
+   * Bind event to action.
+   * @param {string} [eventName] - Event name
+   * @returns {void}
    */
-  private _getScrollbarWidth() : number{
-    return this._contentElement.nativeElement.offsetWidth - this._contentElement.nativeElement.clientWidth;
+  private _bindEventListenerToAction(eventName?: string): void {
+    if(!this._eventListenerActionList) {
+      return;
+    }
+
+    if(eventName) {
+      if(this._unlistenEventListenerList[eventName]){
+        return;
+      }
+
+      const eventListenerAction = this._eventListenerActionList.find(ea => ea.events.some(e => e === eventName));
+      if(eventListenerAction) {
+        this._unlistenEventListenerList[eventName] = this._renderer.listen(eventListenerAction.element, eventName, eventListenerAction.action);
+      }
+    } else {
+      for(const eventListenerAction of this._eventListenerActionList) {
+        // Check condition if exists
+        if(eventListenerAction.condition) {
+          if((typeof eventListenerAction.condition === 'function' && !eventListenerAction.condition())) {
+            continue;
+          }
+        }
+
+        eventListenerAction.events.forEach((eventName) => {
+          if(!this._unlistenEventListenerList[eventName]) {
+            this._unlistenEventListenerList[eventName] = this._renderer.listen(eventListenerAction.element, eventName, eventListenerAction.action);
+          }
+        })
+      }
+    }
+  }
+
+  /**
+   * Unbind event to action.
+   * @param {string} [eventName] - Event name
+   * @returns {void}
+   */
+  private _unbindEventListenerToAction(eventName?: string): void{
+    if(!this._unlistenEventListenerList) {
+      return;
+    }
+
+    if(eventName) {
+      if(!this._unlistenEventListenerList[eventName]){
+        return;
+      }
+
+      this._unlistenEventListenerList[eventName]();
+    } else {
+      for(const key in this._unlistenEventListenerList) {
+        this._unlistenEventListenerList[key]();
+      }
+    }
+  }
+
+
+
+
+
+
+
+  private _log(text: any){
+    console.log(text);
   }
 }
