@@ -1,8 +1,9 @@
-import { Directive, ElementRef, OnInit, AfterViewInit, OnDestroy, OnChanges, Renderer2, SimpleChanges, Input } from '@angular/core';
+import { Directive, ElementRef, OnInit, AfterViewInit, OnDestroy, OnChanges, Optional, Inject, Renderer2, SimpleChanges, Input } from '@angular/core';
 import { CLASSNAME } from './constants/classname';
 import { EventListenerAction} from './models/event-listener-action';
 import { Scrollbar } from './models/scrollbar';
 import { Bar } from './models/bar';
+import { ScrollbarConfig, SCROLLBAR_CONFIG, DEFAULT_SCROLLBAR_CONFIG } from './scrollbar.config';
 
 @Directive({
   selector: '[scrollbar]'
@@ -10,6 +11,7 @@ import { Bar } from './models/bar';
 export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnChanges{
   @Input() autoHide:boolean;
 
+  private _config: ScrollbarConfig;
   private _containerElement: ElementRef;
   private _maskElement: ElementRef;
   private _offsetElement: ElementRef;
@@ -27,25 +29,26 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * @param {ElementRef} element - Current element
    * @param {Renderer2} renderer - Renderer service
    */
-  constructor(private _element: ElementRef, private _renderer: Renderer2) { }
+  constructor(private _element: ElementRef, private _renderer: Renderer2, @Optional() @Inject(SCROLLBAR_CONFIG) private SCROLLBAR_CONFIG: ScrollbarConfig) { }
 
   /**
    * OnInit lifecycle.
    * @returns {void}
    */
   public ngOnInit(): void {
+    this._initConfig();
     this._initDOM();
     this._initListeners();
 
     const nativeScrollbar = this._getNativeScrollbar();
-    this._updateTrackbarThickness(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
-    this._hideNativeScrollbar(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
-
     const bar = this._getBar();
-    this._updateBarSize(bar.verticalSize, bar.horizontalSize);
-
     const barPosition = this._getPositionBar(bar);
-    this._updateBarPosition(barPosition.topOffset, barPosition.leftOffset);
+
+    this._hideNativeScrollbar(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
+    this._setTrackbarThickness(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
+    this._setBarSize(bar.verticalSize, bar.horizontalSize);
+    this._setBarPosition(barPosition.topOffset, barPosition.leftOffset);
+    this._setTrackbarVisibility(!this.autoHide);
   }
 
   /**
@@ -71,6 +74,18 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    */
   ngOnDestroy(): void {
     this._unbindEventListenerToAction();
+  }
+
+  /**
+   * Init config.
+   * @returns {void}
+   */
+  private _initConfig(): void{
+    this._config = DEFAULT_SCROLLBAR_CONFIG;
+
+    if(this.SCROLLBAR_CONFIG){
+      Object.assign(this._config, this.SCROLLBAR_CONFIG);
+    }
   }
 
   /**
@@ -101,9 +116,9 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     this._offsetElement = this._createElement('div', [CLASSNAME.OFFSET]);
     this._contentElement = this._createElement('div', [CLASSNAME.CONTENT]);
     this._horizontalTrackbarElement = this._createElement('div', [CLASSNAME.TRACKBAR, CLASSNAME.HORIZONTAL_TRACKBAR]);
-    this._horizontalBarElement = this._createElement('div', [CLASSNAME.BAR, CLASSNAME.BAR_VISIBLE]);
+    this._horizontalBarElement = this._createElement('div', [CLASSNAME.BAR]);
     this._verticalTrackbarElement = this._createElement('div', [CLASSNAME.TRACKBAR, CLASSNAME.VERTICAL_TRACKBAR]);
-    this._verticalBarElement = this._createElement('div', [CLASSNAME.BAR, CLASSNAME.BAR_VISIBLE]);
+    this._verticalBarElement = this._createElement('div', [CLASSNAME.BAR]);
 
     if(this._element.nativeElement.childNodes) {
       while(this._element.nativeElement.childNodes.length > 0) {
@@ -131,16 +146,13 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     this._eventListenerActionList = [
       { element: this._element.nativeElement, 
         events: ['mouseenter'], 
-        action: (e) => {  },
+        action: (e) => { this._setTrackbarVisibility(true); },
         condition: () => { return this.autoHide; } 
       }, 
       { element: this._element.nativeElement, 
-        events: ['mousemove'], 
-        action: (e) => {  }
-      },
-      { element: this._element.nativeElement, 
         events: ['mouseleave'], 
-        action: (e) => {  }
+        action: (e) => { this._setTrackbarVisibility(false); },
+        condition: () => { return this.autoHide; } 
       },
       { element: this._contentElement, 
         events: ['scroll'], 
@@ -150,16 +162,25 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
         events: ['resize'], 
         action: (e) => { this._onWindowResize(e) }
       },
-      { element: this._element.nativeElement, 
+      { element: this._verticalBarElement, 
         events: ['mousedown',
-                'click',
-                'dblclick',
-                'touchstart',
-                'touchend',
-                'touchmove'], 
-        action: (e) => {  }
+                'touchstart'], 
+        action: (e) => { console.log(e)}
       },
-      
+      { element: this._element.nativeElement, 
+        events: ['mouseup',
+                'touchend'], 
+        action: (e) => { console.log(e)}
+      },
+      // { element: this._verticalBarElement, 
+      //   events: ['mousedown',
+      //           'click',
+      //           'dblclick',
+      //           'touchstart',
+      //           'touchend',
+      //           'touchmove'], 
+      //   action: (e) => { console.log(e)}
+      // },
     ];
     
     this._bindEventListenerToAction();
@@ -172,7 +193,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    */
   private _onWindowResize(e: Event): void{
     const nativeScrollbar = this._getNativeScrollbar();
-    this._updateTrackbarThickness(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
+    this._setTrackbarThickness(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
     this._hideNativeScrollbar(nativeScrollbar.verticalThickness, nativeScrollbar.horizontalThickness);
   }
 
@@ -184,40 +205,50 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
   private _onScroll(e: Event): void{
     const bar = this._getBar();
     const barPosition = this._getPositionBar(bar);
-    this._updateBarPosition(barPosition.topOffset, barPosition.leftOffset);
+    window.requestAnimationFrame(() => { this._setBarPosition(barPosition.topOffset, barPosition.leftOffset) });
   }
 
   /**
-   * Update trackbar thickness.
+   * Set trackbar thickness.
    * Trackbar thickness reduces when zoom in
    * and increases with zoom out
    * @param {number} verticalThickness - Vertical native scrollbar thickness
    * @param {number} horizontalThickness - Horizontal native scrollbar thickness
    * @returns {void}
    */
-  private _updateTrackbarThickness(verticalThickness: number, horizontalThickness: number): void{
+  private _setTrackbarThickness(verticalThickness: number, horizontalThickness: number): void{
     this._renderer.setStyle(this._verticalTrackbarElement, 'width', `${verticalThickness}px`);
     this._renderer.setStyle(this._horizontalTrackbarElement, 'height', `${horizontalThickness}px`);
   }
 
+  private _setTrackbarVisibility(visible: boolean): void{
+    if(visible){
+      this._renderer.addClass(this._verticalBarElement, CLASSNAME.BAR_VISIBLE);
+      this._renderer.addClass(this._horizontalBarElement, CLASSNAME.BAR_VISIBLE);
+    } else {
+      this._renderer.removeClass(this._verticalBarElement, CLASSNAME.BAR_VISIBLE);
+      this._renderer.removeClass(this._horizontalBarElement, CLASSNAME.BAR_VISIBLE);
+    }
+  }
+
   /**
-   * Update bar size.
+   * Set bar size.
    * @param {number} verticalSize - Vertical bar size
    * @param {number} horizontalSize - Horizontal bar size
    * @returns {void}
    */
-  private _updateBarSize(verticalSize: number, horizontalSize: number): void {
+  private _setBarSize(verticalSize: number, horizontalSize: number): void {
     this._renderer.setStyle(this._verticalBarElement, 'height', `${verticalSize}px`);
     this._renderer.setStyle(this._horizontalBarElement, 'width', `${horizontalSize}px`);
   }
 
   /**
-   * Update bar position.
+   * Set bar position.
    * @param {number} topOffset - Top offset position
    * @param {number} leftOffset - Left offset position
    * @returns {void}
    */
-  private _updateBarPosition(topOffset: number, leftOffset: number): void {
+  private _setBarPosition(topOffset: number, leftOffset: number): void {
     this._renderer.setStyle(this._verticalBarElement, 'transform', `translate3d(0, ${topOffset}px, 0)`);
     this._renderer.setStyle(this._horizontalBarElement, 'transform', `translate3d(${leftOffset}px, 0, 0)`);
   }
