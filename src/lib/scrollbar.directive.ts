@@ -198,7 +198,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
   }
 
   private _initScrollbar(): void{
-    const offsetBars = this._getOffsetBar();
+    const offsetBars = this._getThicknessBar();
     const bar = this._getBar();
     const barPosition = this._getPositionBar(bar);
 
@@ -207,12 +207,16 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
     const horizontalTrackbar = new Trackbar();
     horizontalTrackbar.axis = Axis.X;
-    horizontalTrackbar.
+    horizontalTrackbar.thickness = offsetBars.horizontalBarThickness;
     horizontalTrackbar.bar = new Bar();
-    horizontalTrackbar.bar.offset = offsetBars.horizontalBarOffset;
+    horizontalTrackbar.bar.offset = offsetBars.horizontalBarThickness;
 
     const verticalTrackbar = new Trackbar();
     verticalTrackbar.axis = Axis.Y;
+    verticalTrackbar.thickness = offsetBars.verticalBarThickness;
+    verticalTrackbar.bar = new Bar();
+    verticalTrackbar.bar.offset = offsetBars.verticalBarThickness;
+    verticalTrackbar.bar.size = bar.size
     
 
   }
