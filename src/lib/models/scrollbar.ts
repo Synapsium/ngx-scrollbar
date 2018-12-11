@@ -1,4 +1,9 @@
+import { Trackbar } from "./trackbar";
+
 export class Scrollbar {
-    public verticalThickness: number;
-    public horizontalThickness: number;
+    public trackbars: Array<Trackbar>;
+
+    constructor() {
+        this.trackbars = new Array<Trackbar>();
+    }
 }

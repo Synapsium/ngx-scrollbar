@@ -1,4 +1,7 @@
+
 export class Bar {
-    public verticalSize: number;
-    public horizontalSize: number;
+    public element: any;
+    public size: number;
+    public offset: number;
+    public dragable: boolean;
 }
