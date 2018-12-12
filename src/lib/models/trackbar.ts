@@ -1,5 +1,5 @@
-import { Bar } from "./bar";
-import { Axis } from "./axis";
+import { Bar } from './bar';
+import { Axis } from './axis';
 
 export class Trackbar {
     public axis: Axis;

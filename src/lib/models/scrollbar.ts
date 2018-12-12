@@ -1,4 +1,4 @@
-import { Trackbar } from "./trackbar";
+import { Trackbar } from './trackbar';
 
 export class Scrollbar {
     public trackbars: Array<Trackbar>;
