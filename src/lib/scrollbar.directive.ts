@@ -284,7 +284,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     let position = trackbar.axis === Axis.X ? e.pageX : e.pageY;
     let moveOffset = position - trackbar.bar.pointerOffset;
     trackbar.bar.offset = trackbar.bar.dragOffset + moveOffset;
-    console.log("trackbar.bar.offset" + trackbar.bar.offset)
     if(trackbar.bar.offset < trackbar.bar.maxOffset) {
       this._scroll(trackbar.axis, trackbar.bar);
     }
@@ -360,6 +359,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   private _scroll(axis: Axis, bar: Bar): void {
     if(axis === Axis.X) {
+      
+
       (<any>this._contentElement).scrollLeft = bar.offset;
     } else {
       (<any>this._contentElement).scrollTop = bar.offset;
