@@ -249,11 +249,18 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     window.requestAnimationFrame(() => { this._updateBarPositionUI(Axis.Y, verticalBar) });
   }
 
+  /**
+   * On drag scrollbar start event.
+   * @param {Axis} axis - X for horizontal, Y for vertical
+   * @param {MouseEvent} e - Mouse event
+   * @returns {void}
+   */
   private _onSelectBarStart(axis: Axis, e: MouseEvent): void {
     e.preventDefault();
     e.stopPropagation();
 
-    const bar = this._scrollbar.trackbars.find(t => t.axis === axis).bar;
+    const trackbar = this._scrollbar.trackbars.find(t => t.axis === axis);
+    const bar = trackbar.bar;
     bar.dragging = true;
     bar.pointerOffset = axis === Axis.X ? e.pageX : e.pageY;
     bar.dragOffset = bar.offset;
@@ -261,7 +268,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     const dragEventAction = [
       { element: window, 
         events: ['mousemove'], 
-                call: (e) => { this._onSelectBarMove(e) }
+                call: (e) => { this._onSelectBarMove(e, trackbar) }
       },
       { element: window, 
         events: ['mouseup',
@@ -273,17 +280,26 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     this._attachEventAction(dragEventAction);
   }
 
-  private _onSelectBarMove(e: MouseEvent): void {
-    let trackbar = this._scrollbar.trackbars.find(t => t.bar.dragging);
+  /**
+   * On drag scrollbar move event.
+   * @param {MouseEvent} e - Mouse event
+   * @param {Trackbar} trackbar - Trackbar
+   * @returns {void}
+   */
+  private _onSelectBarMove(e: MouseEvent, trackbar: Trackbar): void {
     let position = trackbar.axis === Axis.X ? e.pageX : e.pageY;
     let moveOffset = position - trackbar.bar.pointerOffset;
     trackbar.bar.offset = trackbar.bar.dragOffset + moveOffset;
-    this._scroll(trackbar.axis, trackbar.bar);
+    const scrollTo = this._calcPositionContent(trackbar);
+    this._scroll(trackbar.axis, scrollTo);
   }
 
+  /**
+   * On drag scrollbar end event.
+   * @param {MouseEvent} e - Mouse event
+   * @returns {void}
+   */
   private _onSelectBarEnd(e: MouseEvent): void {
-    let bar = this._scrollbar.trackbars.find(t => t.bar.dragging).bar;
-    bar.dragging = false;
     this._removeEventAction(window, 'mousemove');
     this._removeEventAction(window, 'mouseup');
     this._removeEventAction(window, 'touchend');
@@ -348,14 +364,17 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     }
   }
 
-
-  private _scroll(axis: Axis, bar: Bar): void {
-    const position = this._calcPositionContent(this._scrollbar.trackbars.find(t => t.axis === axis));
-
+  /**
+   * Scroll.
+   * @param {Axis} axis - X for horizontal, Y for vertical
+   * @param {number} scrollTo - scrollTo
+   * @returns {void}
+   */
+  private _scroll(axis: Axis, scrollTo: number): void {
     if(axis === Axis.X) {
-      (<any>this._contentElement).scrollLeft = position;
+      (<any>this._contentElement).scrollLeft = scrollTo;
     } else {
-      (<any>this._contentElement).scrollTop = position;
+      (<any>this._contentElement).scrollTop = scrollTo;
     }
   }
 
@@ -366,7 +385,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * @returns {void}
    */
   private _hideNativeScrollbar(offsetRight: number, offsetBottom: number): void{
-    
     this._renderer.setStyle(this._offsetElement, 'right', `-${offsetRight}px`);
     this._renderer.setStyle(this._offsetElement, 'bottom', `-${offsetBottom}px`);
   }
@@ -417,15 +435,22 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * @returns { number } Returns size.
    */
   private _calcSizeBar(axis: Axis): number {
-    if(axis === Axis.X) {
-      const contentWidthSize = (<any>this._contentElement).scrollWidth;
-      const hostWidthSize = (<any>this._element.nativeElement).clientWidth;
-      return hostWidthSize < contentWidthSize ? ~~((hostWidthSize*hostWidthSize) / contentWidthSize) : 0;
+    const contentSize = axis === Axis.X ? (<any>this._contentElement).scrollWidth : (<any>this._contentElement).scrollHeight;
+    const hostSize = axis === Axis.X ? (<any>this._element.nativeElement).clientWidth : (<any>this._element.nativeElement).clientHeight;
+    
+    if(hostSize > contentSize || contentSize === 0){
+      return 0;
+    }
+
+    const sizeBar = ~~((hostSize*hostSize) / contentSize);
+    
+    if(this._config.barMaxSize > 0 && sizeBar > this._config.barMaxSize) {
+      return this._config.barMaxSize;
+    } else if (this._config.barMinSize > 0 && sizeBar < this._config.barMinSize) {
+      return this._config.barMinSize;
     } else {
-      const contentHeightSize = (<any>this._contentElement).scrollHeight;
-      const hostHeightSize = (<any>this._element.nativeElement).clientHeight;
-      return hostHeightSize < contentHeightSize ? ~~((hostHeightSize*hostHeightSize) / contentHeightSize) : 0;
-    } 
+      return sizeBar;
+    }
   }
 
   /**
