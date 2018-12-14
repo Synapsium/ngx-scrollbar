@@ -198,7 +198,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     horizontalTrackbar.bar = new Bar();
     horizontalTrackbar.bar.element = this._horizontalBarElement;
     horizontalTrackbar.bar.size = this._calcSizeBar(Axis.X);
-    horizontalTrackbar.bar.maxOffset = horizontalTrackbar.size - horizontalTrackbar.bar.size;
     horizontalTrackbar.bar.offset = this._calcPositionBar(Axis.X, horizontalTrackbar.bar.size);
     this._scrollbar.trackbars.push(horizontalTrackbar);
 
@@ -209,11 +208,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     verticalTrackbar.bar = new Bar();
     verticalTrackbar.bar.element = this._verticalBarElement;
     verticalTrackbar.bar.size = this._calcSizeBar(Axis.Y);
-    console.log("verticalTrackbar.size :" + verticalTrackbar.size);
-    console.log("verticalTrackbar.bar.size :" + verticalTrackbar.bar.size);
-    verticalTrackbar.bar.maxOffset = verticalTrackbar.size - verticalTrackbar.bar.size;
-    console.log("verticalTrackbar.bar.maxOffset :" + verticalTrackbar.bar.maxOffset);
-
     verticalTrackbar.bar.offset = this._calcPositionBar(Axis.Y, verticalTrackbar.bar.size);
     this._scrollbar.trackbars.push(verticalTrackbar);
   }
@@ -284,17 +278,15 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     let position = trackbar.axis === Axis.X ? e.pageX : e.pageY;
     let moveOffset = position - trackbar.bar.pointerOffset;
     trackbar.bar.offset = trackbar.bar.dragOffset + moveOffset;
-    if(trackbar.bar.offset < trackbar.bar.maxOffset) {
-      this._scroll(trackbar.axis, trackbar.bar);
-    }
+    this._scroll(trackbar.axis, trackbar.bar);
   }
 
   private _onSelectBarEnd(e: MouseEvent): void {
     let bar = this._scrollbar.trackbars.find(t => t.bar.dragging).bar;
     bar.dragging = false;
-    this._removeEventAction(this._contentElement, 'mousemove');
-    this._removeEventAction(this._element.nativeElement, 'mouseup');
-    this._removeEventAction(this._element.nativeElement, 'touchend');
+    this._removeEventAction(window, 'mousemove');
+    this._removeEventAction(window, 'mouseup');
+    this._removeEventAction(window, 'touchend');
   }
 
   /**
@@ -409,13 +401,13 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
   private _calcPositionContent(trackbar: Trackbar): number {
     if(trackbar.axis === Axis.X) {
       const contentWidthSize = (<any>this._contentElement).scrollWidth;
-      const ratio = trackbar.size / contentWidthSize;
-      return trackbar.bar.offset/ratio;
+      const ratio =  contentWidthSize / trackbar.size;
+      return trackbar.bar.offset*ratio;
 
     } else {
       const contentHeightSize = (<any>this._contentElement).scrollHeight;
-      const ratio = trackbar.size / contentHeightSize;
-      return trackbar.bar.offset/ratio;
+      const ratio = contentHeightSize / trackbar.size;
+      return trackbar.bar.offset*ratio;
     }
   }
 
