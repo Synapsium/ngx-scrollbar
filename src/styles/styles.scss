@@ -111,14 +111,14 @@
         .scrollbar-bar {
             position: absolute;
             right: 2px;
-            width: 80%;
+            width: 50%;
             min-height: 10px;
 
             &:before {
                 position: absolute;
                 content: "";
-                background: black;
-                border-radius: 7px;
+                background: #272727ed;
+                border-radius: 3px;
                 left: 0;
                 right: 0;
                 opacity: 0;
