@@ -434,10 +434,14 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * @returns { number } Returns thickness.
    */
   private _calcThicknessBar(axis: Axis): number {
-    if(axis === Axis.X) {
-      return this._contentElement['offsetWidth'] - this._contentElement['clientWidth'];
+    const thickness = axis === Axis.X ? this._contentElement['offsetWidth'] - this._contentElement['clientWidth'] : this._contentElement['offsetHeight'] - this._contentElement['clientHeight'];
+
+    if(thickness > this._config.trackbarMaxThickness) {
+      return this._config.trackbarMaxThickness;
+    } else if (thickness < this._config.trackbarMinThickness) {
+      return this._config.trackbarMinThickness;
     } else {
-      return this._contentElement['offsetHeight'] - this._contentElement['clientHeight'];
+      return thickness;
     }
   }
 
