@@ -193,19 +193,27 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
     const horizontalTrackbar = new Trackbar();
     horizontalTrackbar.axis = Axis.X;
+    horizontalTrackbar.size = (<any>this._element.nativeElement).clientWidth;
     horizontalTrackbar.thickness = this._calcThicknessBar(Axis.X);
     horizontalTrackbar.bar = new Bar();
     horizontalTrackbar.bar.element = this._horizontalBarElement;
     horizontalTrackbar.bar.size = this._calcSizeBar(Axis.X);
+    horizontalTrackbar.bar.maxOffset = horizontalTrackbar.size - horizontalTrackbar.bar.size;
     horizontalTrackbar.bar.offset = this._calcPositionBar(Axis.X, horizontalTrackbar.bar.size);
     this._scrollbar.trackbars.push(horizontalTrackbar);
 
     const verticalTrackbar = new Trackbar();
     verticalTrackbar.axis = Axis.Y;
+    verticalTrackbar.size = (<any>this._element.nativeElement).clientHeight;
     verticalTrackbar.thickness = this._calcThicknessBar(Axis.Y);
     verticalTrackbar.bar = new Bar();
     verticalTrackbar.bar.element = this._verticalBarElement;
     verticalTrackbar.bar.size = this._calcSizeBar(Axis.Y);
+    console.log("verticalTrackbar.size :" + verticalTrackbar.size);
+    console.log("verticalTrackbar.bar.size :" + verticalTrackbar.bar.size);
+    verticalTrackbar.bar.maxOffset = verticalTrackbar.size - verticalTrackbar.bar.size;
+    console.log("verticalTrackbar.bar.maxOffset :" + verticalTrackbar.bar.maxOffset);
+
     verticalTrackbar.bar.offset = this._calcPositionBar(Axis.Y, verticalTrackbar.bar.size);
     this._scrollbar.trackbars.push(verticalTrackbar);
   }
@@ -216,12 +224,20 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * @returns {void}
    */
   private _onWindowResize(e: MouseEvent): void {
-    const horizontalThicknessBar = this._calcThicknessBar(Axis.X);
-    const verticalThicknessBar = this._calcThicknessBar(Axis.Y);
+    this._initScrollbar();
 
-    this._updateThicknessBarUI(Axis.X, horizontalThicknessBar);
-    this._updateThicknessBarUI(Axis.Y, verticalThicknessBar);
-    this._hideNativeScrollbar(verticalThicknessBar, horizontalThicknessBar);
+    const horizontalTrackbar = this._scrollbar.trackbars.find(t => t.axis === Axis.X);
+    const verticalTrackbar = this._scrollbar.trackbars.find(t => t.axis === Axis.Y);
+
+    this._hideNativeScrollbar(horizontalTrackbar.thickness, verticalTrackbar.thickness);
+
+    this._updateThicknessBarUI(horizontalTrackbar.axis, horizontalTrackbar.thickness);
+    this._updateBarSizeUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
+    this._updateBarPositionUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
+
+    this._updateThicknessBarUI(verticalTrackbar.axis, verticalTrackbar.thickness);
+    this._updateBarSizeUI(verticalTrackbar.axis, verticalTrackbar.bar);
+    this._updateBarPositionUI(verticalTrackbar.axis, verticalTrackbar.bar);
   }
 
    /**
@@ -245,14 +261,15 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
     const bar = this._scrollbar.trackbars.find(t => t.axis === axis).bar;
     bar.dragging = true;
-    bar.dragOffset = axis === Axis.X ? e.pageX : e.pageY;
+    bar.pointerOffset = axis === Axis.X ? e.pageX : e.pageY;
+    bar.dragOffset = bar.offset;
 
     const dragEventAction = [
-      { element: this._contentElement, 
+      { element: window, 
         events: ['mousemove'], 
                 call: (e) => { this._onSelectBarMove(e) }
       },
-      { element: this._element.nativeElement, 
+      { element: window, 
         events: ['mouseup',
                 'touchend'], 
                 call: (e) => { this._onSelectBarEnd(e) }
@@ -265,9 +282,12 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
   private _onSelectBarMove(e: MouseEvent): void {
     let trackbar = this._scrollbar.trackbars.find(t => t.bar.dragging);
     let position = trackbar.axis === Axis.X ? e.pageX : e.pageY;
-    let elementOffset = trackbar.axis === Axis.X ? (<any>this._element.nativeElement).getBoundingClientRect().left : (<any>this._element.nativeElement).getBoundingClientRect().top;
-    let diffOffset = trackbar.bar.dragOffset - position;
-
+    let moveOffset = position - trackbar.bar.pointerOffset;
+    trackbar.bar.offset = trackbar.bar.dragOffset + moveOffset;
+    console.log("trackbar.bar.offset" + trackbar.bar.offset)
+    if(trackbar.bar.offset < trackbar.bar.maxOffset) {
+      this._scroll(trackbar.axis, trackbar.bar);
+    }
   }
 
   private _onSelectBarEnd(e: MouseEvent): void {
@@ -337,6 +357,15 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     }
   }
 
+
+  private _scroll(axis: Axis, bar: Bar): void {
+    if(axis === Axis.X) {
+      (<any>this._contentElement).scrollLeft = bar.offset;
+    } else {
+      (<any>this._contentElement).scrollTop = bar.offset;
+    }
+  }
+
   /**
    * Hide native scrollbar using offset.
    * @param {number} offsetRight - Right offset
@@ -369,6 +398,15 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
       const ratioTop = contentTopOffset / (contentHeightSize - hostHeightSize);
       return (hostHeightSize - sizeBar) * ratioTop;
     }
+  }
+
+  /**
+   * Calculate position of content.
+   * @param {Trackbar} trackbar - trackbar
+   * @returns { number } Returns content offset.
+   */
+  private _calcPositionContent(trackbar: Trackbar): number {
+    return 0;
   }
 
   /**
@@ -448,13 +486,15 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * @returns {void}
    */
   private _removeEventAction(element: any, eventName: string): void {
-    const attachedEvent = this._attachedEventList.find(ae => ae.element === element && ae.event === eventName);
+    const attachedEventIndex = this._attachedEventList.findIndex(ae => ae.element === element && ae.event === eventName);
 
-    if(attachedEvent) {
-      attachedEvent.unlisten();
-      if(attachedEvent.remove) {
-        attachedEvent.remove();
+    if(attachedEventIndex >= 0) {
+      this._attachedEventList[attachedEventIndex].unlisten();
+      if(this._attachedEventList[attachedEventIndex].remove) {
+        this._attachedEventList[attachedEventIndex].remove();
       }
+
+      this._attachedEventList.splice(attachedEventIndex, 1);
     }
   }
 
