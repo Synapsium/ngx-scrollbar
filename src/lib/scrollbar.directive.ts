@@ -358,12 +358,12 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
 
   private _scroll(axis: Axis, bar: Bar): void {
-    if(axis === Axis.X) {
-      
+    const position = this._calcPositionContent(this._scrollbar.trackbars.find(t => t.axis === axis));
 
-      (<any>this._contentElement).scrollLeft = bar.offset;
+    if(axis === Axis.X) {
+      (<any>this._contentElement).scrollLeft = position;
     } else {
-      (<any>this._contentElement).scrollTop = bar.offset;
+      (<any>this._contentElement).scrollTop = position;
     }
   }
 
@@ -407,7 +407,16 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * @returns { number } Returns content offset.
    */
   private _calcPositionContent(trackbar: Trackbar): number {
-    return 0;
+    if(trackbar.axis === Axis.X) {
+      const contentWidthSize = (<any>this._contentElement).scrollWidth;
+      const ratio = trackbar.size / contentWidthSize;
+      return trackbar.bar.offset/ratio;
+
+    } else {
+      const contentHeightSize = (<any>this._contentElement).scrollHeight;
+      const ratio = trackbar.size / contentHeightSize;
+      return trackbar.bar.offset/ratio;
+    }
   }
 
   /**
