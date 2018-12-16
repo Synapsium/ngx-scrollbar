@@ -115,8 +115,8 @@
             &:before {
                 position: absolute;
                 content: "";
-                background: #272727ed;
-                border-radius: 3px;
+                background-color: rgb(20, 20, 20);
+                border-radius: 5px;
                 left: 0;
                 right: 0;
                 opacity: 0;
@@ -124,7 +124,7 @@
             }
 
             &.scrollbar-visible:before {
-                opacity: 0.5;
+                opacity: 0.4;
                 transition: opacity 0s linear;
             }
         }
