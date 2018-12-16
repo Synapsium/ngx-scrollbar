@@ -31,15 +31,13 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Represents scrollbar constructor.
-   * @constructor
-   * @param {ElementRef} element - Current element
-   * @param {Renderer2} renderer - Renderer service
+   * @param element - Current element
+   * @param renderer - Renderer service
    */
   constructor(private _element: ElementRef, private _renderer: Renderer2, @Optional() @Inject(SCROLLBAR_CONFIG) private SCROLLBAR_CONFIG: ScrollbarConfig) { }
 
   /**
    * OnInit lifecycle.
-   * @returns {void}
    */
   public ngOnInit(): void {
     this._initConfig();
@@ -65,15 +63,13 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * AfterViewInit lifecycle.
-   * @returns {void}
    */
   ngAfterViewInit(): void {
   }
 
   /**
    * OnChanges lifecycle.
-   * @returns {void}
-   * @param {SimpleChanges} changes - Changes
+   * @param changes - Changes
    */
   ngOnChanges(changes: SimpleChanges): void {
     //if !autohide => unbind event mouseenter + display scrollbar
@@ -82,7 +78,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * OnDestroy lifecycle.
-   * @returns {void}
    */
   ngOnDestroy(): void {
     this._removeAllEventActions();
@@ -90,7 +85,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Init config.
-   * @returns {void}
    */
   private _initConfig(): void{
     this._config = DEFAULT_SCROLLBAR_CONFIG;
@@ -120,7 +114,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    *    <div class="scrollbar-bar"></div>    
    *  </div>
    * </div>
-   * @returns {void}
    */
   private _initDOM(): void{
     this._containerElement = this._createElement('div', [CLASSNAME.CONTAINER]);
@@ -152,7 +145,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Init listener to action.
-   * @returns {void}
    */
   private _initListeners(): void{
 
@@ -222,8 +214,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Resize event on window.
-   * @param {Event} e - Resize event 
-   * @returns {void}
+   * @param e - Resize event 
    */
   private _onWindowResize(e: MouseEvent): void {
     this._init();
@@ -245,8 +236,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
    /**
    * Scroll event.
-   * @param {Event} e - Scroll event
-   * @returns {void}
+   * @param e - Scroll event
    */
   private _onScroll(e: MouseEvent): void{
     const horizontalBar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.X).bar;
@@ -260,9 +250,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * On drag scrollbar start event.
-   * @param {Axis} axis - X for horizontal, Y for vertical
-   * @param {MouseEvent} e - Mouse event
-   * @returns {void}
+   * @param  axis - X for horizontal, Y for vertical
+   * @param  e - Mouse event
    */
   private _onSelectBarStart(axis: Axis, e: MouseEvent): void {
     e.preventDefault();
@@ -291,9 +280,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * On drag scrollbar move event.
-   * @param {MouseEvent} e - Mouse event
-   * @param {Trackbar} trackbar - Trackbar
-   * @returns {void}
+   * @param e - Mouse event
+   * @param trackbar - Trackbar
    */
   private _onSelectBarMove(e: MouseEvent, trackbar: Trackbar): void {
     let position = trackbar.axis === Axis.X ? e.pageX : e.pageY;
@@ -305,8 +293,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * On drag scrollbar end event.
-   * @param {MouseEvent} e - Mouse event
-   * @returns {void}
+   * @param e - Mouse event
    */
   private _onSelectBarEnd(e: MouseEvent): void {
     this._removeEventAction(window, 'mousemove');
@@ -318,9 +305,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
    * Update thickness bar.
    * Thickness bar reduces when zoom in
    * and increases with zoom out
-   * @param {Axis} axis - X for horizontal, Y for vertical
-   * @param {number} thickness - thickness
-   * @returns {void}
+   * @param axis - X for horizontal, Y for vertical
+   * @param thickness - thickness
    */
   private _updateThicknessBarUI(axis: Axis, thickness: number): void{
     if(axis === Axis.X) {
@@ -332,8 +318,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Update bar visibility.
-   * @param {boolean} visible - Is visible
-   * @returns {void}
+   * @param visible - Is visible
    */
   private _updateBarVisibilityUI(visible: boolean): void{
     if(visible){
@@ -347,9 +332,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Update bar size.
-   * @param {number} axis - X for horizontal, Y for vertical
-   * @param {Bar} bar - bar
-   * @returns {void}
+   * @param axis - X for horizontal, Y for vertical
+   * @param bar - bar
    */
   private _updateBarSizeUI(axis: Axis, bar: Bar): void {
     if(axis === Axis.X) {
@@ -361,9 +345,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Update bar position.
-   * @param {number} axis - X for horizontal, Y for vertical
-   * @param {Bar} bar - bar
-   * @returns {void}
+   * @param axis - X for horizontal, Y for vertical
+   * @param bar - bar
    */
   private _updateBarPositionUI(axis: Axis, bar: Bar): void {
     if(axis === Axis.X) {
@@ -377,9 +360,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Scroll.
-   * @param {Axis} axis - X for horizontal, Y for vertical
-   * @param {number} scrollTo - scrollTo
-   * @returns {void}
+   * @param axis - X for horizontal, Y for vertical
+   * @param scrollTo - scrollTo
    */
   private _scroll(axis: Axis, scrollTo: number): void {
     if(axis === Axis.X) {
@@ -395,9 +377,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Hide native scrollbar using offset.
-   * @param {number} offsetRight - Right offset
-   * @param {number} offsetBottom - Bottom offset
-   * @returns {void}
+   * @param offsetRight - Right offset
+   * @param offsetBottom - Bottom offset
    */
   private _hideNativeScrollbar(offsetRight: number, offsetBottom: number): void{
     this._renderer.setStyle(this._offsetElement, 'right', `-${offsetRight}px`);
@@ -406,9 +387,9 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Calculate position bar.
-   * @param {Axis} axis - X for horizontal, Y for vertical
-   * @param {number} sizeBar - size bar
-   * @returns { number } Returns offset.
+   * @param axis - X for horizontal, Y for vertical
+   * @param sizeBar - size bar
+   * @returns offset.
    */
   private _calcPositionBar(axis: Axis, sizeBar: number): number {
     if(axis === Axis.X) {
@@ -428,8 +409,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Calculate position of content.
-   * @param {Trackbar} trackbar - trackbar
-   * @returns { number } Returns content offset.
+   * @param trackbar - trackbar
+   * @returns content offset.
    */
   private _calcPositionContent(trackbar: Trackbar): number {
     if(trackbar.axis === Axis.X) {
@@ -446,8 +427,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Calculate size bar.
-   * @param {Axis} axis - X for horizontal, Y for vertical
-   * @returns { number } Returns size.
+   * @param axis - X for horizontal, Y for vertical
+   * @returns size.
    */
   private _calcSizeBar(axis: Axis): number {
     const contentSize = axis === Axis.X ? (<any>this._contentElement).scrollWidth : (<any>this._contentElement).scrollHeight;
@@ -470,8 +451,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Calculate thickness bar.
-   * @param {Axis} axis - X for horizontal, Y for vertical
-   * @returns { number } Returns thickness.
+   * @param axis - X for horizontal, Y for vertical
+   * @returns thickness.
    */
   private _calcThicknessBar(axis: Axis): number {
     const thickness = axis === Axis.X ? this._contentElement['offsetWidth'] - this._contentElement['clientWidth'] : this._contentElement['offsetHeight'] - this._contentElement['clientHeight'];
@@ -487,9 +468,9 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Create element and set class names.
-   * @param {string} element - Current element
-   * @param {Array<string>} classnames - list of class name
-   * @returns {ElementRef} Returns element created.
+   * @param element - Current element
+   * @param classnames - list of class name
+   * @returns element created.
    */
   private _createElement(element: string, classnames: Array<string>): ElementRef {
     const result = this._renderer.createElement(element);
@@ -501,8 +482,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Attach event to action.
-   * @param { Array<EventAction> } eventActions - Events
-   * @returns {void}
+   * @param eventActions - Events
    */
   private _attachEventAction(eventActions: Array<EventAction>): void {
     for(const eventAction of eventActions) {
@@ -527,9 +507,8 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Remove event to action.
-   * @param {any} element - element
-   * @param {string} eventName - event
-   * @returns {void}
+   * @param element - element
+   * @param eventName - event
    */
   private _removeEventAction(element: any, eventName: string): void {
     const attachedEventIndex = this._attachedEventList.findIndex(ae => ae.element === element && ae.event === eventName);
@@ -546,7 +525,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
 
   /**
    * Remove all event to action.
-   * @returns {void}
    */
   private _removeAllEventActions(): void{
     for(const attachedEvent of this._attachedEventList) {
