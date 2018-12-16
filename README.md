@@ -1,27 +1,68 @@
-# Demo
+<p align="center">
+  <a href="http://synapsium.com">
+    <h1 align="center">ngx-scrollbar</h1>
+  </a>
+</p>
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.0.1.
+<p align="center">
+Ngx-scrollbar is a customizable and lightweight scrollbar based on native browser scrollbar for Angular.
+</p>
 
-## Development server
+## Setup
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+### Installation
 
-## Code scaffolding
+Install `ngx-scrollbar` library from `npm`
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```bash
+npm install @synapsium/ngx-scrollbar --save
+```
 
-## Build
+### Style
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Import ngx-scrollbar style into your project `styles.css`
 
-## Running unit tests
+```javascript
+@import '../node_modules/@synapsium/ngx-scrollbar/styles/styles.scss';
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Module usage
 
-## Running end-to-end tests
+Add `ScrollbarModule` to module
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+```javascript
+import { ScrollbarModule } from 'ngx-scrollbar-dev/scrollbar.module';
+import { ScrollbarConfig, SCROLLBAR_CONFIG } from 'ngx-scrollbar-dev/scrollbar.config';
 
-## Further help
+const DEFAULT_SCROLLBAR_CONFIG: ScrollbarConfig = {
+  autoHide: true,
+  trackbarMinThickness: 17,
+  trackbarMaxThickness: 20,
+  barMinSize: 20
+};
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+@NgModule({
+  ...
+  imports: [
+    ...
+    ScrollbarModule
+  ],
+  providers: [
+    {
+      provide: SCROLLBAR_CONFIG,
+      useValue: DEFAULT_SCROLLBAR_CONFIG
+    }
+  ]
+})
+```
+
+## How to use
+
+Add `scrollbar` directive to the container
+
+```html
+<div scrollbar 
+    [auto-hide]="false">
+    <!-- Your content here... -->
+</div>
+```
