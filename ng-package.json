@@ -2,8 +2,7 @@
     "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
     "dest": "./dist/@synapsium/ngx-scrollbar",
     "lib": {
-        "entryFile": "src/public_api.ts",
-        "styleIncludePaths": ["src/styles"]
+        "entryFile": "src/public_api.ts"
     },
     "whitelistedNonPeerDependencies": [
         "angular",
