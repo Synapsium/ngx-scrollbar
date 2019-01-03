@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="http://synapsium.com">
+  <a href="https://synapsium.com">
     <h1 align="center">ngx-scrollbar</h1>
   </a>
 </p>
