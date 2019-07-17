@@ -31,8 +31,7 @@ Import ngx-scrollbar style into your project `styles.css`
 Add `ScrollbarModule` to module
 
 ```javascript
-import { ScrollbarModule } from 'ngx-scrollbar/scrollbar.module';
-import { ScrollbarConfig, SCROLLBAR_CONFIG } from 'ngx-scrollbar/scrollbar.config';
+import { ScrollbarModule, ScrollbarConfig, SCROLLBAR_CONFIG } from '@synapsium/ngx-scrollbar';
 
 const DEFAULT_SCROLLBAR_CONFIG: ScrollbarConfig = {
   autoHide: true,
