@@ -1,6 +1,6 @@
 {
     "name": "@synapsium/ngx-scrollbar",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Angular wrapper library for beautiful charts based on Chartjs",
     "author": "https://github.com/synapsium/ngx-scrollbar/graphs/contributors",
     "license": "MIT",
@@ -30,6 +30,13 @@
     },
     "private": false,
     "dependencies": {
+    },
+    "devDependencies": {
+        "@angular-devkit/build-angular": "^0.13.9",
+        "@angular-devkit/build-ng-packagr": "^0.13.9",
+        "@angular/cli": "~7.0.1",
+        "@angular/compiler-cli": "~7.0.0",
+        "@angular/language-service": "~7.0.0",
         "@angular/animations": "~7.0.0",
         "@angular/common": "~7.0.0",
         "@angular/compiler": "~7.0.0",
@@ -41,14 +48,7 @@
         "@angular/router": "~7.0.0",
         "core-js": "^2.5.4",
         "rxjs": "~6.3.3",
-        "zone.js": "~0.8.26"
-    },
-    "devDependencies": {
-        "@angular-devkit/build-angular": "^0.801.1",
-        "@angular-devkit/build-ng-packagr": "^0.11.0",
-        "@angular/cli": "~7.0.1",
-        "@angular/compiler-cli": "~7.0.0",
-        "@angular/language-service": "~7.0.0",
+        "zone.js": "~0.8.26",
         "@types/jasmine": "~2.8.8",
         "@types/jasminewd2": "~2.0.3",
         "@types/node": "~8.9.4",
