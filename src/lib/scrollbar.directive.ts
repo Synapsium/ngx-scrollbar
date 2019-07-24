@@ -1,4 +1,4 @@
-import { Directive, ElementRef, OnInit, AfterViewInit,
+import { Directive, ElementRef, AfterViewInit,
          OnDestroy, OnChanges, Optional, Inject, Renderer2, SimpleChanges, Input } from '@angular/core';
 import { CLASSNAME } from './constants/classname';
 import { ScrollbarConfig, SCROLLBAR_CONFIG, DEFAULT_SCROLLBAR_CONFIG } from './scrollbar.config';
@@ -13,7 +13,7 @@ import { ScrollbarContainer } from './models/scrollbar-container';
 @Directive({
   selector: '[scrollbar]'
 })
-export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnChanges {
+export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   @Input() autoHide: boolean;
 
   private _config: ScrollbarConfig;
@@ -38,10 +38,11 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
   constructor(private _element: ElementRef, private _renderer: Renderer2,
               @Optional() @Inject(SCROLLBAR_CONFIG) private _injectedConfig: ScrollbarConfig) { }
 
+
   /**
-   * OnInit lifecycle.
+   * AfterViewInit lifecycle.
    */
-  public ngOnInit(): void {
+  ngAfterViewInit(): void {
     this._initConfig();
     this._initDOM();
     this._initListeners();
@@ -61,12 +62,6 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     this._updateThicknessBarUI(verticalTrackbar.axis, verticalTrackbar.thickness);
     this._updateBarSizeUI(verticalTrackbar.axis, verticalTrackbar.bar);
     this._updateBarPositionUI(verticalTrackbar.axis, verticalTrackbar.bar);
-  }
-
-  /**
-   * AfterViewInit lifecycle.
-   */
-  ngAfterViewInit(): void {
   }
 
   /**
