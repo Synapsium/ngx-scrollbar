@@ -45,16 +45,14 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   ngAfterViewInit(): void {
     this._initConfig();
     this._initDOM();
-    this._initListeners();
-    this._init();
-
+    this._initModel();
+    
     const horizontalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.X);
     const verticalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.Y);
 
     this._hideNativeScrollbar(horizontalTrackbar.thickness, verticalTrackbar.thickness);
-    this._copyPadding(this._model.marginTop, this._model.marginRight, this._model.marginBottom, this._model.marginLeft);
     this._updateBarVisibilityUI(!this.autoHide);
-
+    
     this._updateThicknessBarUI(horizontalTrackbar.axis, horizontalTrackbar.thickness);
     this._updateBarSizeUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
     this._updateBarPositionUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
@@ -62,6 +60,8 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     this._updateThicknessBarUI(verticalTrackbar.axis, verticalTrackbar.thickness);
     this._updateBarSizeUI(verticalTrackbar.axis, verticalTrackbar.bar);
     this._updateBarPositionUI(verticalTrackbar.axis, verticalTrackbar.bar);
+
+    this._initListeners();
   }
 
   /**
@@ -138,6 +138,14 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
 
     this._renderer.appendChild(this._verticalTrackbarElement, this._verticalBarElement);
     this._renderer.appendChild(this._element.nativeElement, this._verticalTrackbarElement);
+
+    const elementStyle = getComputedStyle(this._element.nativeElement);
+    const top = `${elementStyle.paddingTop}`;
+    const bottom = `${elementStyle.paddingBottom}`;
+    const left = `${elementStyle.paddingLeft}`;
+    const right = `${elementStyle.paddingRight}`;
+
+    this._renderer.setStyle(this._contentElement, 'padding', `${top} ${right} ${bottom} ${left}`);
   }
 
   /**
@@ -185,14 +193,13 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     this._attachEventAction(eventActions);
   }
 
-  private _init(): void {
-    this._model = new ScrollbarContainer();
+  private _initModel(): void {
     const elementStyle = getComputedStyle(this._element.nativeElement);
+    this._model = new ScrollbarContainer();
     this._model.marginTop = `${elementStyle.paddingTop}`;
     this._model.marginBottom = `${elementStyle.paddingBottom}`;
     this._model.marginLeft = `${elementStyle.paddingLeft}`;
     this._model.marginRight = `${elementStyle.paddingRight}`;
-    this._model.scrollbar = new Scrollbar();
 
     const horizontalTrackbar = new Trackbar();
     horizontalTrackbar.axis = Axis.X;
@@ -220,14 +227,14 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    * @param e - Resize event
    */
   private _onWindowResize(e: MouseEvent): void {
-    this._init();
-
+    this._initModel();
+    
     const horizontalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.X);
     const verticalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.Y);
-
+    
     this._hideNativeScrollbar(horizontalTrackbar.thickness, verticalTrackbar.thickness);
-    this._copyPadding(this._model.marginTop, this._model.marginRight, this._model.marginBottom, this._model.marginLeft);
-
+    
+    
     this._updateThicknessBarUI(horizontalTrackbar.axis, horizontalTrackbar.thickness);
     this._updateBarSizeUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
     this._updateBarPositionUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
@@ -261,10 +268,9 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     e.stopPropagation();
 
     const trackbar = this._model.scrollbar.trackbars.find(t => t.axis === axis);
-    const bar = trackbar.bar;
-    bar.dragging = true;
-    bar.pointerOffset = axis === Axis.X ? e.pageX : e.pageY;
-    bar.dragOffset = bar.offset;
+    trackbar.bar.dragging = true;
+    trackbar.bar.pointerOffset = axis === Axis.X ? e.pageX : e.pageY;
+    trackbar.bar.dragOffset = trackbar.bar.offset;
 
     const dragEventAction = [
       {
@@ -291,9 +297,13 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   private _onSelectBarMove(e: MouseEvent, trackbar: Trackbar): void {
     const position = trackbar.axis === Axis.X ? e.pageX : e.pageY;
     const moveOffset = position - trackbar.bar.pointerOffset;
-    trackbar.bar.offset = trackbar.bar.dragOffset + moveOffset;
-    const scrollTo = this._calcPositionContent(trackbar);
-    this._scroll(trackbar.axis, scrollTo);
+    const maxOffset = trackbar.size - trackbar.bar.size;
+    
+    if((trackbar.bar.dragOffset + moveOffset) >= 0 && (trackbar.bar.dragOffset + moveOffset) <= maxOffset) {
+      trackbar.bar.offset = trackbar.bar.dragOffset + moveOffset;
+      const scrollTo = this._calcPositionContent(trackbar);
+      this._scroll(trackbar.axis, scrollTo);
+    }
   }
 
   /**
@@ -374,10 +384,6 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     } else {
       (<any>this._contentElement).scrollTop = scrollTo;
     }
-  }
-
-  private _copyPadding(top: string, right: string, bottom: string, left: string): void {
-    this._renderer.setStyle(this._contentElement, 'padding', `${top} ${right} ${bottom} ${left}`);
   }
 
   /**

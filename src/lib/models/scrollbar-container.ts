@@ -6,4 +6,8 @@ export class ScrollbarContainer {
     public marginBottom: string;
     public marginRight: string;
     public marginLeft: string;
+
+    constructor() {
+        this.scrollbar = new Scrollbar();
+    }
 }
