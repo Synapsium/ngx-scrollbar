@@ -444,7 +444,7 @@ export class ScrollbarDirective implements OnInit, AfterViewInit, OnDestroy, OnC
     const contentSize = axis === Axis.X ? (<any>this._contentElement).scrollWidth : (<any>this._contentElement).scrollHeight;
     const hostSize = axis === Axis.X ? (<any>this._element.nativeElement).clientWidth : (<any>this._element.nativeElement).clientHeight;
 
-    if (hostSize > contentSize || contentSize === 0) {
+    if (hostSize >= contentSize || contentSize === 0) {
       return 0;
     }
 
