@@ -88,7 +88,9 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    *    <div class="mask">
    *      <div class="offset">
    *        <div class="content">
-   *          // content here
+   *          <div class="resize">
+   *            // content here
+   *          </div>
    *        </div>
    *      </div>
    *    </div>
