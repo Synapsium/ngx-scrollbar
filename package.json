@@ -1,6 +1,6 @@
 {
     "name": "@synapsium/ngx-scrollbar",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "Angular wrapper library for beautiful charts based on Chartjs",
     "author": "https://github.com/synapsium/ngx-scrollbar/graphs/contributors",
     "license": "MIT",
@@ -30,6 +30,7 @@
     },
     "private": false,
     "dependencies": {
+        "resize-observer-polyfill": "^1.5.1"
     },
     "devDependencies": {
         "@angular-devkit/build-angular": "^0.13.9",

@@ -5,7 +5,7 @@ import { ScrollbarConfig, SCROLLBAR_CONFIG, DEFAULT_SCROLLBAR_CONFIG } from './s
 import { EventAction } from './events/event-action';
 import { Trackbar } from './models/trackbar';
 import { Bar } from './models/bar';
-import { Scrollbar } from './models/scrollbar';
+import ResizeObserver from 'resize-observer-polyfill';
 import { Axis } from './models/axis';
 import { AttachedEvent } from './events/attached-event';
 import { ScrollbarContainer } from './models/scrollbar-container';
@@ -19,11 +19,14 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   private _config: ScrollbarConfig;
   private _model: ScrollbarContainer;
   private _attachedEventList: Array<AttachedEvent> = [];
+  private _resizeObserver: ResizeObserver;
+  private _mutationObserver: MutationObserver;
 
   private _containerElement: ElementRef;
   private _maskElement: ElementRef;
   private _offsetElement: ElementRef;
   private _contentElement: ElementRef;
+  private _resizeElement: ElementRef;
   private _horizontalTrackbarElement: ElementRef;
   private _horizontalBarElement: ElementRef;
   private _verticalTrackbarElement: ElementRef;
@@ -45,22 +48,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   ngAfterViewInit(): void {
     this._initConfig();
     this._initDOM();
-    this._initModel();
-    
-    const horizontalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.X);
-    const verticalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.Y);
-
-    this._hideNativeScrollbar(horizontalTrackbar.thickness, verticalTrackbar.thickness);
-    this._updateBarVisibilityUI(!this.autoHide);
-    
-    this._updateThicknessBarUI(horizontalTrackbar.axis, horizontalTrackbar.thickness);
-    this._updateBarSizeUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
-    this._updateBarPositionUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
-
-    this._updateThicknessBarUI(verticalTrackbar.axis, verticalTrackbar.thickness);
-    this._updateBarSizeUI(verticalTrackbar.axis, verticalTrackbar.bar);
-    this._updateBarPositionUI(verticalTrackbar.axis, verticalTrackbar.bar);
-
+    this._initScrollbar();
     this._initListeners();
   }
 
@@ -78,6 +66,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    */
   ngOnDestroy(): void {
     this._removeAllEventActions();
+    this._removeObservers();
   }
 
   /**
@@ -117,6 +106,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     this._maskElement = this._createElement('div', [CLASSNAME.MASK]);
     this._offsetElement = this._createElement('div', [CLASSNAME.OFFSET]);
     this._contentElement = this._createElement('div', [CLASSNAME.CONTENT]);
+    this._resizeElement = this._createElement('div', [CLASSNAME.RESIZE]);
     this._horizontalTrackbarElement = this._createElement('div', [CLASSNAME.TRACKBAR, CLASSNAME.HORIZONTAL_TRACKBAR]);
     this._horizontalBarElement = this._createElement('div', [CLASSNAME.BAR]);
     this._verticalTrackbarElement = this._createElement('div', [CLASSNAME.TRACKBAR, CLASSNAME.VERTICAL_TRACKBAR]);
@@ -124,10 +114,11 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
 
     if (this._element.nativeElement.childNodes) {
       while (this._element.nativeElement.childNodes.length > 0) {
-        this._renderer.appendChild(this._contentElement, this._element.nativeElement.childNodes[0]);
+        this._renderer.appendChild(this._resizeElement, this._element.nativeElement.childNodes[0]);
       }
     }
 
+    this._renderer.appendChild(this._contentElement, this._resizeElement);
     this._renderer.appendChild(this._offsetElement, this._contentElement);
     this._renderer.appendChild(this._maskElement, this._offsetElement);
     this._renderer.appendChild(this._containerElement, this._maskElement);
@@ -172,11 +163,6 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
         call: (e) => { this._onScroll(e); }
       },
       {
-        element: window,
-        events: ['resize'],
-        call: (e) => { this._onWindowResize(e); }
-      },
-      {
         element: this._verticalBarElement,
         events: ['mousedown',
           'touchstart'],
@@ -191,6 +177,20 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     ];
 
     this._attachEventAction(eventActions);
+
+    if ('ResizeObserver' in window) {
+      this._resizeObserver = new ResizeObserver(() => this._initScrollbar());
+      this._resizeObserver.observe(this._element.nativeElement);
+      this._resizeObserver.observe(document.querySelector("."+CLASSNAME.RESIZE));
+    }
+    else {
+      const resizeAction = [{
+        element: window,
+        events: ['resize'],
+        call: (e) => { this._initScrollbar(); }
+      }]
+      this._attachEventAction(resizeAction);
+    }
   }
 
   private _initModel(): void {
@@ -222,18 +222,14 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     this._model.scrollbar.trackbars.push(verticalTrackbar);
   }
 
-  /**
-   * Resize event on window.
-   * @param e - Resize event
-   */
-  private _onWindowResize(e: MouseEvent): void {
+  private _initScrollbar(): void {
     this._initModel();
     
     const horizontalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.X);
     const verticalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.Y);
-    
+
     this._hideNativeScrollbar(horizontalTrackbar.thickness, verticalTrackbar.thickness);
-    
+    this._updateBarVisibilityUI(!this.autoHide);
     
     this._updateThicknessBarUI(horizontalTrackbar.axis, horizontalTrackbar.thickness);
     this._updateBarSizeUI(horizontalTrackbar.axis, horizontalTrackbar.bar);
@@ -545,5 +541,9 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
         attachedEvent.remove();
       }
     }
+  }
+
+  private _removeObservers(): void {
+    this._resizeObserver && this._resizeObserver.disconnect();
   }
 }

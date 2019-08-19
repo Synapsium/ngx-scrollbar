@@ -8,6 +8,7 @@
         "angular",
         "core-js",
         "rxjs",
-        "zone.js"
+        "zone.js",
+        "resize-observer-polyfill"
     ]
 }
