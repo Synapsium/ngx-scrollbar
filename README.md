@@ -1,4 +1,5 @@
 <p align="center">
+  <img height="200px" width="200px"  src="https://raw.githubusercontent.com/Synapsium/ngx-scrollbar/master/assets/images/ngx-scrollbar-logo.png">
   <a href="https://synapsium.com">
     <h1 align="center">ngx-scrollbar</h1>
   </a>
