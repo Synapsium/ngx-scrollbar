@@ -231,6 +231,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     const verticalTrackbar = this._model.scrollbar.trackbars.find(t => t.axis === Axis.Y);
 
     this._hideNativeScrollbar(horizontalTrackbar.thickness, verticalTrackbar.thickness);
+    this._updateResizeContainerSize(horizontalTrackbar.thickness, verticalTrackbar.thickness);
     this._updateBarVisibilityUI(!this.autoHide);
     
     this._updateThicknessBarUI(horizontalTrackbar.axis, horizontalTrackbar.thickness);
@@ -369,7 +370,15 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
-
+  /**
+   * Update resize container size.
+  * @param offsetRight - Right offset
+   * @param offsetBottom - Bottom offset
+   */
+  private _updateResizeContainerSize(offsetRight: number, offsetBottom: number): void {
+    this._renderer.setStyle(this._resizeElement, 'height', `calc(100% - ${offsetBottom}px)`);
+    this._renderer.setStyle(this._resizeElement, 'width', `calc(100% - ${offsetRight}px)`);
+  }
 
   /**
    * Scroll.
@@ -443,7 +452,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     const contentSize = axis === Axis.X ? (<any>this._contentElement).scrollWidth : (<any>this._contentElement).scrollHeight;
     const hostSize = axis === Axis.X ? (<any>this._element.nativeElement).clientWidth : (<any>this._element.nativeElement).clientHeight;
 
-    if (hostSize >= contentSize || contentSize === 0) {
+    if (hostSize + 1 >= contentSize || contentSize === 0) {
       return 0;
     }
 
@@ -468,11 +477,11 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
                       this._contentElement['offsetHeight'] - this._contentElement['clientHeight'];
 
     if (thickness > this._config.trackbarMaxThickness) {
-      return this._config.trackbarMaxThickness;
+      return this._config.trackbarMaxThickness + 1;
     } else if (thickness < this._config.trackbarMinThickness) {
-      return this._config.trackbarMinThickness;
+      return this._config.trackbarMinThickness + 1;
     } else {
-      return thickness;
+      return thickness + 1;
     }
   }
 
