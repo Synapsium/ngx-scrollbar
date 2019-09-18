@@ -209,7 +209,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     horizontalTrackbar.thickness = this._calcThicknessBar(Axis.X);
     horizontalTrackbar.bar = new Bar();
     horizontalTrackbar.bar.element = this._horizontalBarElement;
-    horizontalTrackbar.bar.size = this._calcSizeBar(Axis.X);
+    horizontalTrackbar.bar.size = this._calcSizeBar(Axis.X, horizontalTrackbar.thickness);
     horizontalTrackbar.bar.offset = this._calcPositionBar(Axis.X, horizontalTrackbar.bar.size);
     this._model.scrollbar.trackbars.push(horizontalTrackbar);
 
@@ -219,7 +219,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
     verticalTrackbar.thickness = this._calcThicknessBar(Axis.Y);
     verticalTrackbar.bar = new Bar();
     verticalTrackbar.bar.element = this._verticalBarElement;
-    verticalTrackbar.bar.size = this._calcSizeBar(Axis.Y);
+    verticalTrackbar.bar.size = this._calcSizeBar(Axis.Y, verticalTrackbar.thickness);
     verticalTrackbar.bar.offset = this._calcPositionBar(Axis.Y, verticalTrackbar.bar.size);
     this._model.scrollbar.trackbars.push(verticalTrackbar);
   }
@@ -376,8 +376,8 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    * @param offsetBottom - Bottom offset
    */
   private _updateResizeContainerSize(offsetRight: number, offsetBottom: number): void {
-    this._renderer.setStyle(this._resizeElement, 'height', `calc(100% - ${offsetBottom}px)`);
-    this._renderer.setStyle(this._resizeElement, 'width', `calc(100% - ${offsetRight}px)`);
+    this._renderer.setStyle(this._resizeElement, 'min-height', `calc(100% - ${offsetBottom}px)`);
+    this._renderer.setStyle(this._resizeElement, 'min-width', `calc(100% - ${offsetRight}px)`);
   }
 
   /**
@@ -399,8 +399,8 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    * @param offsetBottom - Bottom offset
    */
   private _hideNativeScrollbar(offsetRight: number, offsetBottom: number): void {
-    this._renderer.setStyle(this._offsetElement, 'right', `-${offsetRight}px`);
-    this._renderer.setStyle(this._offsetElement, 'bottom', `-${offsetBottom}px`);
+    this._renderer.setStyle(this._offsetElement, 'right', `-${offsetRight + 1}px`);
+    this._renderer.setStyle(this._offsetElement, 'bottom', `-${offsetBottom + 1}px`);
   }
 
   /**
@@ -448,15 +448,15 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    * @param axis - X for horizontal, Y for vertical
    * @returns size.
    */
-  private _calcSizeBar(axis: Axis): number {
-    const contentSize = axis === Axis.X ? (<any>this._contentElement).scrollWidth : (<any>this._contentElement).scrollHeight;
+  private _calcSizeBar(axis: Axis, offset: number): number {
+    const contentSize = axis === Axis.X ? (<any>this._contentElement).scrollWidth - offset : (<any>this._contentElement).scrollHeight - offset;
     const hostSize = axis === Axis.X ? (<any>this._element.nativeElement).clientWidth : (<any>this._element.nativeElement).clientHeight;
 
     if (hostSize + 1 >= contentSize || contentSize === 0) {
       return 0;
     }
 
-    const sizeBar = ~~((hostSize * hostSize) / contentSize);
+    const sizeBar = ~~((hostSize * hostSize) / (contentSize + offset));
 
     if (this._config.barMaxSize > 0 && sizeBar > this._config.barMaxSize) {
       return this._config.barMaxSize;
@@ -477,11 +477,11 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
                       this._contentElement['offsetHeight'] - this._contentElement['clientHeight'];
 
     if (thickness > this._config.trackbarMaxThickness) {
-      return this._config.trackbarMaxThickness + 1;
+      return this._config.trackbarMaxThickness;
     } else if (thickness < this._config.trackbarMinThickness) {
-      return this._config.trackbarMinThickness + 1;
+      return this._config.trackbarMinThickness;
     } else {
-      return thickness + 1;
+      return thickness;
     }
   }
 
