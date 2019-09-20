@@ -15,12 +15,12 @@ import { ScrollbarContainer } from './models/scrollbar-container';
 })
 export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   @Input() autoHide: boolean;
+  @Input() disableScrollbar: boolean;
 
   private _config: ScrollbarConfig;
   private _model: ScrollbarContainer;
   private _attachedEventList: Array<AttachedEvent> = [];
   private _resizeObserver: ResizeObserver;
-  private _mutationObserver: MutationObserver;
 
   private _containerElement: ElementRef;
   private _maskElement: ElementRef;
@@ -46,10 +46,12 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    * AfterViewInit lifecycle.
    */
   ngAfterViewInit(): void {
-    this._initConfig();
-    this._initDOM();
-    this._initScrollbar();
-    this._initListeners();
+    if(!this.disableScrollbar) {
+      this._initConfig();
+      this._initDOM();
+      this._initScrollbar();
+      this._initListeners();
+    }
   }
 
   /**

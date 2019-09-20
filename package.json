@@ -1,6 +1,6 @@
 {
     "name": "@synapsium/ngx-scrollbar",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Angular wrapper library for beautiful charts based on Chartjs",
     "author": "https://github.com/synapsium/ngx-scrollbar/graphs/contributors",
     "license": "MIT",
