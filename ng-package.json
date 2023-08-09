@@ -4,11 +4,8 @@
     "lib": {
         "entryFile": "src/public_api.ts"
     },
-    "whitelistedNonPeerDependencies": [
+    "allowedNonPeerDependencies": [
         "angular",
-        "core-js",
-        "rxjs",
-        "zone.js",
         "resize-observer-polyfill"
     ]
 }

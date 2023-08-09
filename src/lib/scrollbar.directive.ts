@@ -152,31 +152,31 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
       {
         element: this._element.nativeElement,
         events: ['mouseenter'],
-        call: (e) => { this._updateBarVisibilityUI(true); },
+        call: (e: any) => { this._updateBarVisibilityUI(true); },
         condition: () => this.autoHide
       },
       {
         element: this._element.nativeElement,
         events: ['mouseleave'],
-        call: (e) => { this._updateBarVisibilityUI(false); },
+        call: (e: any) => { this._updateBarVisibilityUI(false); },
         condition: () => this.autoHide
       },
       {
         element: this._contentElement,
         events: ['scroll'],
-        call: (e) => { this._onScroll(e); }
+        call: (e: any) => { this._onScroll(e); }
       },
       {
         element: this._verticalBarElement,
         events: ['mousedown',
           'touchstart'],
-        call: (e) => { this._onSelectBarStart(Axis.Y, e); }
+        call: (e: any) => { this._onSelectBarStart(Axis.Y, e); }
       },
       {
         element: this._horizontalBarElement,
         events: ['mousedown',
           'touchstart'],
-        call: (e) => { this._onSelectBarStart(Axis.X, e); }
+        call: (e: any) => { this._onSelectBarStart(Axis.X, e); }
       }
     ];
 
@@ -191,7 +191,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
       const resizeAction = [{
         element: window,
         events: ['resize'],
-        call: (e) => { this._initScrollbar(); }
+        call: (e: any) => { this._initScrollbar(); }
       }]
       this._attachEventAction(resizeAction);
     }

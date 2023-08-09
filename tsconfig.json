@@ -6,19 +6,30 @@
     "compilerOptions": {
         "baseUrl": "./",
         "outDir": "./dist/out-tsc",
+        "strictPropertyInitialization": false,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "strictNullChecks": false,
+        "skipLibCheck": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
         "sourceMap": true,
         "declaration": false,
-        "module": "es2015",
-        "moduleResolution": "node",
-        "emitDecoratorMetadata": true,
+        "downlevelIteration": true,
         "experimentalDecorators": true,
-        "target": "es5",
+        "moduleResolution": "node",
+        "importHelpers": true,
+        "target": "ES2022",
+        "module": "ES2022",
+        "useDefineForClassFields": false,
+        "lib": [
+        "ES2022",
+        "dom"
+        ],
         "typeRoots": [
             "node_modules/@types"
-        ],
-        "lib": [
-            "es2018",
-            "dom"
         ],
         "paths": {
             "ngx-scrollbar/*": [
