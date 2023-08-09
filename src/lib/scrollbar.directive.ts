@@ -380,6 +380,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   private _updateResizeContainerSize(offsetRight: number, offsetBottom: number): void {
     this._renderer.setStyle(this._resizeElement, 'min-height', `calc(100% - ${offsetBottom}px)`);
     this._renderer.setStyle(this._resizeElement, 'min-width', `calc(100% - ${offsetRight}px)`);
+    this._renderer.setStyle(this._resizeElement, 'max-width', `calc(100% - ${offsetRight}px)`);
   }
 
   /**
