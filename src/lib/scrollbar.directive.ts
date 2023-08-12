@@ -32,7 +32,6 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
   private _verticalTrackbarElement: ElementRef;
   private _verticalBarElement: ElementRef;
 
-
   /**
    * Represents scrollbar constructor.
    * @param element - Current element
@@ -40,8 +39,7 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    */
   constructor(private _element: ElementRef, private _renderer: Renderer2,
               @Optional() @Inject(SCROLLBAR_CONFIG) private _injectedConfig: ScrollbarConfig) { }
-
-
+  
   /**
    * AfterViewInit lifecycle.
    */
@@ -476,8 +474,8 @@ export class ScrollbarDirective implements AfterViewInit, OnDestroy, OnChanges {
    * @returns thickness.
    */
   private _calcThicknessBar(axis: Axis): number {
-    const thickness = axis === Axis.X ? this._contentElement['offsetWidth'] - this._contentElement['clientWidth'] :
-                      this._contentElement['offsetHeight'] - this._contentElement['clientHeight'];
+    const thickness = axis === Axis.X ? (<any>this._contentElement).offsetWidth - (<any>this._contentElement).clientWidth :
+                  (<any>this._contentElement).offsetHeight - (<any>this._contentElement).clientHeight;
 
     if (thickness > this._config.trackbarMaxThickness) {
       return this._config.trackbarMaxThickness;

@@ -3,9 +3,5 @@
     "dest": "./dist/@synapsium/ngx-scrollbar",
     "lib": {
         "entryFile": "src/public_api.ts"
-    },
-    "allowedNonPeerDependencies": [
-        "angular",
-        "resize-observer-polyfill"
-    ]
+    }
 }
